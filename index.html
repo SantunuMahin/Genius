@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genius</title>
+    <style>
+        /* Full-page settings */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: #fff;
+            background-color: #001f3f;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        legend {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        input[type="number"], input[type="text"] {
+            padding: 10px;
+            font-size: 18px;
+            border: 2px solid #fff;
+            border-radius: 5px;
+            outline: none;
+            margin-bottom: 10px;
+            width: 200px;
+        }
+
+        input[type="submit"], button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #ff5722;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover, button:hover {
+            background-color: #e64a19;
+        }
+
+        #score, #timer {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+
+        #game-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        span, h3 {
+            font-size: 34px;
+            
+        }
+
+        #message {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+
+        #message.correct {
+            color: #4caf50; /* Green for correct */
+        }
+
+        #message.wrong {
+            color: #f44336; /* Red for wrong */
+        }
+
+        /* Special Messages */
+        #special-message {
+            font-size: 28px;
+            color: #ffeb3b;
+            margin-top: 15px;
+            font-weight: bold;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Animated Mathematical Symbols */
+        .symbol {
+            position: absolute;
+            font-size: 30px;
+            color: rgba(255, 255, 255, 0.5);
+            animation: float 8s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Hey Genius, Welcome!</h1>
+    <legend>Please select a number to multiply: </legend>
+    <input type="number" name="num" placeholder="Enter a number" id="num"> 
+    <input id="ok" type="submit" value="Start Game"><br>
+
+    <div id="game-section" style="display: none;">
+        <span id="m"></span><span> x </span><span id="multiplier"></span> <br>
+        <input type="text" placeholder="Answer" name="output" id="output"><br>
+        <button id="submit-answer">Submit Answer</button>
+        <p id="score">Score: 0</p>
+        <p id="timer">Time Left: 15s</p>
+        <p id="message"></p>
+        <p id="special-message"></p>
+        <button id="restart">Restart Game</button>
+    </div>
+
+    <script>
+        let ok = document.getElementById('ok');
+        let submitAnswer = document.getElementById('submit-answer');
+        let restart = document.getElementById('restart');
+        let score = 0;
+        let timer;
+        let timeLeft = 15;
+
+        ok.addEventListener('click', () => {
+            let num = document.getElementById('num').value;
+            if (!num) {
+                alert("Please enter a number to start the game!");
+                return;
+            }
+
+            let gameSection = document.getElementById('game-section');
+            gameSection.style.display = "block";
+            document.getElementById('num').disabled = true;
+            ok.disabled = true;
+
+            generateQuestion(num);
+            startTimer(num);
+        });
+
+        submitAnswer.addEventListener('click', () => {
+            let num = document.getElementById('num').value;
+            let m = parseInt(document.getElementById('multiplier').textContent);
+            let correctAnswer = parseInt(num) * m;
+            let answer = parseInt(document.getElementById('output').value);
+            let messageElement = document.getElementById('message');
+            let specialMessage = document.getElementById('special-message');
+
+            if (answer === correctAnswer) {
+                score++;
+                document.getElementById('score').textContent = `Score: ${score}`;
+                messageElement.textContent = "Correct!";
+                messageElement.className = "correct";
+
+                // Display special messages
+                if (score === 5) {
+                    specialMessage.textContent = "Great!";
+                } else if (score === 10) {
+                    specialMessage.textContent = "Genius!";
+                    document.getElementById('m').textContent = num++;
+                } else {
+                    specialMessage.textContent = "";
+                }
+            } else {
+                messageElement.textContent = "Wrong. Try again!";
+                messageElement.className = "wrong";
+            }
+
+            resetTimer();
+            generateQuestion(num);
+        });
+
+        restart.addEventListener('click', () => {
+            clearInterval(timer);
+            score = 0;
+            timeLeft = 15;
+            document.getElementById('score').textContent = `Score: ${score}`;
+            document.getElementById('timer').textContent = `Time Left: ${timeLeft}s`;
+            document.getElementById('message').textContent = "";
+            document.getElementById('special-message').textContent = "";
+            document.getElementById('num').value = "";
+            document.getElementById('num').disabled = false;
+            document.getElementById('ok').disabled = false;
+            document.getElementById('game-section').style.display = "none";
+        });
+
+        function generateQuestion(num) {
+            let m = Math.floor(Math.random() * 10) + 1;
+            document.getElementById('m').textContent = num;
+            document.getElementById('multiplier').textContent = m;
+            document.getElementById('output').value = ""; // Clear the input field
+            document.getElementById('output').focus();
+        }
+
+        function startTimer(num) {
+            timeLeft = 15;
+            document.getElementById('timer').textContent = `Time Left: ${timeLeft}s`;
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = `Time Left: ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    alert("Time's up! Moving to the next question.");
+                    generateQuestion(num);
+                    resetTimer();
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(timer);
+            startTimer(document.getElementById('num').value);
+        }
+
+        // Create animated symbols dynamically
+        const symbols = ["+", "-", "×", "÷", "="];
+        const body = document.body;
+
+        function createSymbol() {
+            let symbol = document.createElement("div");
+            symbol.className = "symbol";
+            symbol.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+            symbol.style.left = Math.random() * 100 + "vw";
+            symbol.style.animationDuration = Math.random() * 5 + 5 + "s"; // Between 5s to 10s
+            symbol.style.fontSize = Math.random() * 20 + 30 + "px"; // Between 30px to 50px
+            body.appendChild(symbol);
+
+            // Remove the symbol after animation ends
+            symbol.addEventListener("animationend", () => {
+                symbol.remove();
+            });
+        }
+
+        setInterval(createSymbol, 500); // Create a new symbol every 500ms
+    </script>
+</body>
+</html>
